@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datas</title>
+</head>
+<body>
+    <h1>These are the datas</h1>
+
+    <table id="DataTable">
+        <tr>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Color</th>
+            <th>Specs</th>
+        </tr>
+        <tr>
+            <td>Apple Tab</td>
+            <td>Apple Tab</td>
+            <td>Gadgets</td>
+            <td>Red</td>
+            <td>100% Rebate</td>
+
+        </tr>
+    </table>
+
+</body>
+
+<script>
+    const baseUrl = 'http://localhost:3000'
+
+    async function getProducts() {
+        try{
+            const response = await fetch(`${baseUrl}/api/products`)
+            const data = await response.json()
+            const tableBody = document.getElementById("DataTable");
+            tableBody.innerHTML = "";
+
+            data.products.forEach(products => {
+                const row = 
+                `
+                <tr>
+                    <td>${product.product_name}</td>
+                    <td>${product.description}</td>
+                    <td>${product.category}</td>
+                    <td>${product.color}</td>
+                    <td>${product.specs}</td>
+                </tr>
+                `;
+
+                tableBody.innerHTML += row;
+            });
+            
+        }catch(error){
+            console.log(error)
+        }
+    }
+
+    getProducts()
+</script>
+</html>
