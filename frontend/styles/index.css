@@ -1,0 +1,23 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+#bookbody , #charbackStory{
+    max-width: 500px;
+    min-width: 500px;
+    min-height: 300px;
+    field-sizing: content;
+}
+
+.inputForms{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.charInputs{
+    display: flex;
+    
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=\, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/index.css">
+    <title>Main Title</title>
+</head>
+<body>
+
+    <header>
+        <h1>The Story so Far:</h1>
+        <h2>Story Title: </h2>
+        <h2>Characters: </h2>
+        <table>
+            <th>
+                <tr>Character Name</tr>
+                <tr>Backstory</tr>
+            </th>
+            <tbody>
+                <td>Bowow</td>
+                <td>Backstory ni Bowow</td>
+            </tbody>
+        </table>
+    </header>
+
+    
+    <div class="inputForms">
+        <div>
+            <form action="http://localhost:3000/api/products" method="post">
+        
+                <label for="storyTitle">Enter Title</label><br>
+                <input name="storyTitle" id="storyTitle"></input><br>
+                <label for="bookbody">Enter Story</label><br>
+                <textarea id="bookbody" name="bookbody" placeholder="Enter Your Story Here"></textarea><br>
+        
+                <button type="submit" onsubmit="" style="margin-top: 10px;">Submit Data</button>
+            </form><br>
+        </div>
+        
+        <div>
+            <form action="" method="post">
+        
+                <div class="charInputs">
+                    <label for="charName">Enter Character Name</label><br>
+                    <input name="charName" id="charName"></input><br>
+                    <label for="charLocation">Enter Character Location</label><br>
+                    <input name="charLocation" id="charLocation"></input><br>
+                    <label for="charRace">Enter Character Race</label><br>
+                    <input name="charRace" id="charRace"></input><br>
+                    <label for="charLocation">Enter Character Location</label><br>
+                    <input name="charLocation" id="charLocation"></input><br>
+                </div>
+
+                <label for="charbackStory">Enter Backstory (Optional)</label><br>
+                <textarea id="charbackStory" name="charbackStory" placeholder="Enter Character Backstory here"></textarea><br>
+        
+                <button type="submit" onsubmit="" style="margin-top: 10px;">Submit Character</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="datas.html">go to Datas</a>
+</body>
+</html>
