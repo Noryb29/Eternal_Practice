@@ -1,0 +1,682 @@
+# Step-by-Step Guide: Adding PostgreSQL Backend to BookSite
+
+## Prerequisites
+- PostgreSQL installed and running on your machine
+- Node.js installed
+- Basic knowledge of JavaScript, HTML, SQL
+
+---
+
+## Step 1: Install Required Packages
+
+Open a terminal in your project root (C:\Users\admin\BookSite) and run:
+
+```
+npm install pg dotenv
+```
+
+- **pg** - PostgreSQL client for Node.js
+- **dotenv** - loads .env file into process.env
+
+---
+
+## Step 2: Create the .env File
+
+Create a file named `.env` in the project root with:
+
+```
+DATABASE_URL=postgresql://your_user:your_password@localhost:5432/booksite
+```
+
+Replace `your_user` and `your_password` with your actual PostgreSQL credentials. The database name is `booksite` - create it in pgAdmin or psql:
+
+```sql
+CREATE DATABASE booksite;
+```
+
+---
+
+## Step 3: Create backend/db.js
+
+This file creates a connection pool to your PostgreSQL database.
+
+```javascript
+import pg from 'pg';
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+export default pool;
+```
+
+---
+
+## Step 4: Create the Schema SQL File
+
+Create `backend/schema.sql`:
+
+```sql
+CREATE TABLE IF NOT EXISTS stories (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS chapters (
+  id SERIAL PRIMARY KEY,
+  story_id INTEGER NOT NULL REFERENCES stories(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  chapter_number INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS characters (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(255) DEFAULT '',
+  race VARCHAR(255) DEFAULT '',
+  location VARCHAR(255) DEFAULT '',
+  gender VARCHAR(100) DEFAULT '',
+  backstory TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS locations (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  alt_names TEXT DEFAULT '',
+  landmarks TEXT DEFAULT '',
+  environment TEXT DEFAULT '',
+  lore TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+## Step 5: Run Schema on Startup
+
+Add this to `backend/server.js` after the pool import:
+
+```javascript
+import fs from 'fs';
+import pool from './db.js';
+
+const schema = fs.readFileSync('backend/schema.sql', 'utf8');
+pool.query(schema).then(() => {
+  console.log('Database tables ready');
+}).catch(err => {
+  console.error('Schema error:', err);
+});
+```
+
+Make sure to also load dotenv at the very top of `server.js`:
+
+```javascript
+import 'dotenv/config';
+```
+
+---
+
+## Step 6: Create Controllers
+
+### backend/controllers/storyController.js
+
+```javascript
+import pool from '../db.js';
+
+export async function listStories(req, res) {
+  const result = await pool.query(
+    `SELECT s.id, s.title, s.updated_at,
+            COUNT(ch.id)::int AS chapter_count
+     FROM stories s
+     LEFT JOIN chapters ch ON ch.story_id = s.id
+     GROUP BY s.id
+     ORDER BY s.updated_at DESC`
+  );
+  res.json(result.rows);
+}
+
+export async function getStory(req, res) {
+  const { id } = req.params;
+  const story = await pool.query(
+    'SELECT * FROM stories WHERE id = $1', [id]
+  );
+  if (story.rows.length === 0) {
+    return res.status(404).json({ error: 'Story not found' });
+  }
+  const chapters = await pool.query(
+    'SELECT * FROM chapters WHERE story_id = $1 ORDER BY chapter_number',
+    [id]
+  );
+  res.json({ ...story.rows[0], chapters: chapters.rows });
+}
+
+export async function createStory(req, res) {
+  const { title } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  const result = await pool.query(
+    'INSERT INTO stories (title) VALUES ($1) RETURNING *',
+    [title]
+  );
+  res.status(201).json(result.rows[0]);
+}
+
+export async function addChapter(req, res) {
+  const { id } = req.params;
+  const { title, content } = req.body;
+  if (!title) return res.status(400).json({ error: 'Chapter title is required' });
+
+  // Check story exists
+  const story = await pool.query('SELECT id FROM stories WHERE id = $1', [id]);
+  if (story.rows.length === 0) {
+    return res.status(404).json({ error: 'Story not found' });
+  }
+
+  // Get next chapter number
+  const maxNum = await pool.query(
+    'SELECT COALESCE(MAX(chapter_number), 0) + 1 AS next FROM chapters WHERE story_id = $1',
+    [id]
+  );
+  const chapterNumber = maxNum.rows[0].next;
+
+  const result = await pool.query(
+    `INSERT INTO chapters (story_id, title, content, chapter_number)
+     VALUES ($1, $2, $3, $4) RETURNING *`,
+    [id, title, content || '', chapterNumber]
+  );
+
+  // Update story's updated_at
+  await pool.query(
+    'UPDATE stories SET updated_at = NOW() WHERE id = $1', [id]
+  );
+
+  res.status(201).json(result.rows[0]);
+}
+
+export async function deleteStory(req, res) {
+  const { id } = req.params;
+  await pool.query('DELETE FROM stories WHERE id = $1', [id]);
+  res.json({ message: 'Story deleted' });
+}
+```
+
+### backend/controllers/characterController.js
+
+```javascript
+import pool from '../db.js';
+
+export async function listCharacters(req, res) {
+  const result = await pool.query(
+    'SELECT * FROM characters ORDER BY created_at DESC'
+  );
+  res.json(result.rows);
+}
+
+export async function createCharacter(req, res) {
+  const { name, role, race, location, gender, backstory } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const result = await pool.query(
+    `INSERT INTO characters (name, role, race, location, gender, backstory)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [name, role || '', race || '', location || '', gender || '', backstory || '']
+  );
+  res.status(201).json(result.rows[0]);
+}
+
+export async function deleteCharacter(req, res) {
+  const { id } = req.params;
+  await pool.query('DELETE FROM characters WHERE id = $1', [id]);
+  res.json({ message: 'Character deleted' });
+}
+```
+
+### backend/controllers/locationController.js
+
+```javascript
+import pool from '../db.js';
+
+export async function listLocations(req, res) {
+  const result = await pool.query(
+    'SELECT * FROM locations ORDER BY created_at DESC'
+  );
+  res.json(result.rows);
+}
+
+export async function createLocation(req, res) {
+  const { name, alt_names, landmarks, environment, lore } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const result = await pool.query(
+    `INSERT INTO locations (name, alt_names, landmarks, environment, lore)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [name, alt_names || '', landmarks || '', environment || '', lore || '']
+  );
+  res.status(201).json(result.rows[0]);
+}
+
+export async function deleteLocation(req, res) {
+  const { id } = req.params;
+  await pool.query('DELETE FROM locations WHERE id = $1', [id]);
+  res.json({ message: 'Location deleted' });
+}
+```
+
+---
+
+## Step 7: Create Routes
+
+### backend/routes/stories.js
+
+```javascript
+import { Router } from 'express';
+import {
+  listStories,
+  getStory,
+  createStory,
+  addChapter,
+  deleteStory,
+} from '../controllers/storyController.js';
+
+const router = Router();
+
+router.get('/', listStories);
+router.post('/', createStory);
+router.get('/:id', getStory);
+router.post('/:id/chapters', addChapter);
+router.delete('/:id', deleteStory);
+
+export default router;
+```
+
+### backend/routes/characters.js
+
+```javascript
+import { Router } from 'express';
+import {
+  listCharacters,
+  createCharacter,
+  deleteCharacter,
+} from '../controllers/characterController.js';
+
+const router = Router();
+
+router.get('/', listCharacters);
+router.post('/', createCharacter);
+router.delete('/:id', deleteCharacter);
+
+export default router;
+```
+
+### backend/routes/locations.js
+
+```javascript
+import { Router } from 'express';
+import {
+  listLocations,
+  createLocation,
+  deleteLocation,
+} from '../controllers/locationController.js';
+
+const router = Router();
+
+router.get('/', listLocations);
+router.post('/', createLocation);
+router.delete('/:id', deleteLocation);
+
+export default router;
+```
+
+---
+
+## Step 8: Update backend/server.js
+
+Replace the existing file with:
+
+```javascript
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pool from './db.js';
+import storyRoutes from './routes/stories.js';
+import characterRoutes from './routes/characters.js';
+import locationRoutes from './routes/locations.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// API routes
+app.use('/api/stories', storyRoutes);
+app.use('/api/characters', characterRoutes);
+app.use('/api/locations', locationRoutes);
+
+// Run schema on startup
+const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+pool.query(schema).then(() => {
+  console.log('Database tables ready');
+}).catch(err => {
+  console.error('Schema error:', err);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+```
+
+---
+
+## Step 9: Update frontend/story.html
+
+Replace the entire `<script>` block with this full-featured version:
+
+```html
+<script>
+  let currentStoryId = null;
+  let chapters = [];
+  let currentPage = 0;
+  const wordsPerPage = 80;
+
+  // --- Story Selector ---
+  async function loadStoryList() {
+    const res = await fetch('/api/stories');
+    const stories = await res.json();
+    const select = document.getElementById('storySelect');
+    select.innerHTML = '<option value="">-- Select a story --</option>';
+    stories.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `${s.title} (${s.chapter_count} chapter${s.chapter_count !== 1 ? 's' : ''})`;
+      select.appendChild(opt);
+    });
+  }
+
+  async function onStorySelect() {
+    const select = document.getElementById('storySelect');
+    const id = select.value;
+    if (!id) {
+      currentStoryId = null;
+      chapters = [];
+      currentPage = 0;
+      updateStoryView();
+      return;
+    }
+    const res = await fetch(`/api/stories/${id}`);
+    const story = await res.json();
+    currentStoryId = story.id;
+    document.getElementById('storyTitle').value = story.title;
+    chapters = story.chapters.map(ch => `=== ${story.title} ===\n--- ${ch.title} ---\n\n${ch.content}`);
+    currentPage = chapters.length > 0 ? 0 : 0;
+    updateStoryView();
+  }
+
+  function newStory() {
+    currentStoryId = null;
+    chapters = [];
+    currentPage = 0;
+    document.getElementById('storyTitle').value = '';
+    document.getElementById('chapterTitle').value = '';
+    document.getElementById('storyInput').value = '';
+    document.getElementById('storySelect').value = '';
+    updateStoryView();
+  }
+
+  // --- Add Story / Chapter ---
+  async function addStory() {
+    const title = document.getElementById('storyTitle').value.trim();
+    const chapterTitle = document.getElementById('chapterTitle').value.trim();
+    const text = document.getElementById('storyInput').value.trim();
+
+    if (!title || !chapterTitle) {
+      alert('Please enter both Story Title and Chapter Title.');
+      return;
+    }
+
+    if (!currentStoryId) {
+      // Create a new story
+      const res = await fetch('/api/stories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      const story = await res.json();
+      currentStoryId = story.id;
+    }
+
+    // Add chapter
+    const res = await fetch(`/api/stories/${currentStoryId}/chapters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: chapterTitle, content: text }),
+    });
+    const chapter = await res.json();
+
+    // Append to local pagination
+    chapters.push(`=== ${title} ===\n--- ${chapter.title} ---\n\n${chapter.content}`);
+    currentPage = chapters.length - 1;
+    updateStoryView();
+
+    document.getElementById('chapterTitle').value = '';
+    document.getElementById('storyInput').value = '';
+    loadStoryList();
+  }
+
+  // --- Pagination ---
+  function updateStoryView() {
+    const storyOutput = document.getElementById('storyTextContainer');
+    const pageInfo = document.getElementById('pageInfo');
+    if (chapters.length === 0) {
+      storyOutput.value = '';
+      pageInfo.innerText = 'Page 0';
+      return;
+    }
+    storyOutput.value = chapters[currentPage];
+    pageInfo.innerText = `Page ${currentPage + 1} of ${chapters.length}`;
+  }
+
+  function nextPage() {
+    if (currentPage < chapters.length - 1) {
+      currentPage++;
+      updateStoryView();
+    }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      updateStoryView();
+    }
+  }
+
+  // --- Init ---
+  document.addEventListener('DOMContentLoaded', loadStoryList);
+</script>
+```
+
+And add this HTML just above the `<h1 class="page-title">` line:
+
+```html
+<div class="card" style="margin-bottom: 20px;">
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <label for="storySelect" style="margin: 0; white-space: nowrap;">Select Story:</label>
+    <select id="storySelect" onchange="onStorySelect()" style="flex: 1; padding: 10px;">
+      <option value="">-- Select a story --</option>
+    </select>
+    <button onclick="newStory()" style="margin: 0;">New Story</button>
+  </div>
+</div>
+```
+
+---
+
+## Step 10: Update frontend/characters.html
+
+Replace the existing table body and script with:
+
+Add `<tbody id="characterTable"></tbody>` inside the table.
+
+And the script:
+
+```html
+<script>
+  async function loadCharacters() {
+    const res = await fetch('/api/characters');
+    const chars = await res.json();
+    const tbody = document.getElementById('characterTable');
+    tbody.innerHTML = '';
+    chars.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(c.name)}</td>
+        <td>${escapeHtml(c.role)}</td>
+        <td>${escapeHtml(c.race)}</td>
+        <td>${escapeHtml(c.location)}</td>
+        <td>${escapeHtml(c.gender)}</td>
+        <td>${escapeHtml(c.backstory)}</td>
+        <td><button onclick="deleteChar(${c.id})">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function deleteChar(id) {
+    await fetch(`/api/characters/${id}`, { method: 'DELETE' });
+    loadCharacters();
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  document.getElementById('addCharacterForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('charName').value,
+      role: document.getElementById('charRole').value,
+      race: document.getElementById('charRace').value,
+      location: document.getElementById('charLocation').value,
+      gender: document.getElementById('charGender').value,
+      backstory: document.getElementById('charBackstory').value,
+    };
+    await fetch('/api/characters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    e.target.reset();
+    loadCharacters();
+  });
+
+  document.addEventListener('DOMContentLoaded', loadCharacters);
+</script>
+```
+
+---
+
+## Step 11: Update frontend/locations.html
+
+Replace the table body with `<tbody id="locationTable"></tbody>` and update the script:
+
+```html
+<script>
+  async function loadLocations() {
+    const res = await fetch('/api/locations');
+    const locs = await res.json();
+    const tbody = document.getElementById('locationTable');
+    tbody.innerHTML = '';
+    locs.forEach(l => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(l.name)}</td>
+        <td>${escapeHtml(l.alt_names)}</td>
+        <td>${escapeHtml(l.landmarks)}</td>
+        <td>${escapeHtml(l.environment)}</td>
+        <td>${escapeHtml(l.lore)}</td>
+        <td><button onclick="deleteLoc(${l.id})">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function deleteLoc(id) {
+    await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+    loadLocations();
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.querySelector('[name="locName"]').value,
+      alt_names: document.querySelector('[name="altName"]').value,
+      landmarks: document.querySelector('[name="landMarks"]').value,
+      environment: document.querySelector('[name="envName"]').value,
+      lore: document.querySelector('textarea').value,
+    };
+    await fetch('/api/locations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    e.target.reset();
+    loadLocations();
+  });
+
+  document.addEventListener('DOMContentLoaded', loadLocations);
+</script>
+```
+
+---
+
+## Step 12: Run the Server
+
+```bash
+npm run dev
+```
+
+This will start the Express server on `http://localhost:3000`. Open that URL in your browser.
+
+- story.html - list, create, select stories; add chapters
+- characters.html - add/view/delete characters (saved to DB)
+- locations.html - add/view/delete locations (saved to DB)
+
+---
+
+## Quick Reference: File Summary
+
+| File                                     | Action     |
+|------------------------------------------|------------|
+| .env                                     | Create new |
+| backend/db.js                            | Create new |
+| backend/schema.sql                       | Create new |
+| backend/controllers/storyController.js   | Create new |
+| backend/controllers/characterController.js | Create new |
+| backend/controllers/locationController.js | Create new |
+| backend/routes/stories.js                | Create new |
+| backend/routes/characters.js             | Create new |
+| backend/routes/locations.js              | Create new |
+| backend/server.js                        | Replace    |
+| frontend/story.html                      | Edit (add HTML + replace script) |
+| frontend/characters.html                 | Edit (replace script) |
+| frontend/locations.html                  | Edit (replace script) |
+| package.json                             | Already has dependencies added via npm install |

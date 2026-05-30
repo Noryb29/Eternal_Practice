@@ -58,6 +58,15 @@
     </aside>
 
     <div class="main">
+        <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <label for="storySelect" style="margin: 0; white-space: nowrap;">Select Story:</label>
+            <select id="storySelect" onchange="onStorySelect()" style="flex: 1; padding: 10px;">
+            <option value="">-- Select a story --</option>
+            </select>
+            <button onclick="newStory()" style="margin: 0;">New Story</button>
+        </div>
+        </div>
         <h1 class="page-title">Story Builder</h1>
 
         <div class="inputs">
@@ -175,91 +184,6 @@
     </div>
 
     <script>
-        // simple state tracker
-        let storyTitleSet = false;
-        let chapterTitleSet = false;
-
-        // pagination system
-        let pages = [];
-        let currentPage = 0;
-        const wordsPerPage = 80; // adjust pagination size here
-
-        function updateStoryView() {
-            const storyOutput = document.getElementById("storyTextContainer");
-            const pageInfo = document.getElementById("pageInfo");
-
-            if (pages.length === 0) {
-                storyOutput.value = "";
-                pageInfo.innerText = "Page 0";
-                return;
-            }
-
-            storyOutput.value = pages[currentPage];
-            pageInfo.innerText = `Page ${currentPage + 1} of ${pages.length}`;
-        }
-
-        function addStory() {
-
-            const titleInput = document.getElementById("storyTitle");
-            const chapterInput = document.getElementById("chapterTitle");
-            const storyInput = document.getElementById("storyInput");
-
-            const title = titleInput.value.trim();
-            const chapter = chapterInput.value.trim();
-            const text = storyInput.value.trim();
-
-            if (!storyTitleSet && !chapterTitleSet) {
-
-                if (!title || !chapter) {
-                    alert("Please enter both Story Title and Chapter Title first.");
-                    return;
-                }
-
-                storyTitleSet = true;
-                chapterTitleSet = true;
-
-                pages.push(`=== ${title} ===\n--- ${chapter} ---\n\n`);
-            }
-
-            if (storyTitleSet) {
-                titleInput.disabled = true;
-                chapterInput.disabled = true;
-            }
-
-            if (text) {
-                // append text into last page or create new page if full
-                let lastPage = pages[pages.length - 1] || "";
-
-                const newContent = lastPage + text + ". ";
-
-                const words = newContent.split(" ");
-
-                if (words.length > wordsPerPage) {
-                    pages.push(text + ". ");
-                    currentPage = pages.length - 1;
-                } else {
-                    pages[pages.length - 1] = newContent;
-                }
-
-                storyInput.value = "";
-                updateStoryView();
-            }
-        }
-
-        function nextPage() {
-            if (currentPage < pages.length - 1) {
-                currentPage++;
-                updateStoryView();
-            }
-        }
-
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                updateStoryView();
-            }
-        }
-
         const modal = document.querySelector("#addCharacterModal")
         const openModalButton = document.querySelector("#openModal")
         const closeModalButton = document.querySelector("#closeModalButton")
@@ -272,6 +196,7 @@
             modal.close();
         })
     </script>
+    <script src="./scripts/story.js"></script>
 
 </body>
 

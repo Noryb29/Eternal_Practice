@@ -1,0 +1,37 @@
+CREATE TABLE IF NOT EXISTS stories (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS chapters (
+  id SERIAL PRIMARY KEY,
+  story_id INTEGER NOT NULL REFERENCES stories(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  chapter_number INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS characters (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  role VARCHAR(255) DEFAULT '',
+  race VARCHAR(255) DEFAULT '',
+  location VARCHAR(255) DEFAULT '',
+  gender VARCHAR(100) DEFAULT '',
+  backstory TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS locations (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  alt_names TEXT DEFAULT '',
+  landmarks TEXT DEFAULT '',
+  environment TEXT DEFAULT '',
+  lore TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+

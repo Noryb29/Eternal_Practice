@@ -1,21 +1,39 @@
-import cors from 'cors'
-import express, { json, urlencoded } from 'express'
-import { productRoutes } from './routes/productRoutes.js';
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dbpool from './database/db.js';
+import storyRouter from './routes/storyRoutes.js';
+import characterRouters from './routes/characterRoutes.js';
+import locationRouter from './routes/locationRouters.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
+const PORT = 3000;
 
+app.use(cors());
+app.use(express.json());
 
-app.use(json());
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-app.use(urlencoded({
-    extended: true
-}));
+// API routes
+app.use('/api/stories', storyRouter);
+app.use('/api/characters', characterRouters);
+app.use('/api/locations', locationRouter);
 
-app.use('/api/products',productRoutes)
-app.use(cors())
+// Run schema on startup
+const schema = fs.readFileSync(path.join(__dirname,'database', 'schema.sql'), 'utf8');
+dbpool.query(schema).then(() => {
+  console.log('Database tables ready');
+}).catch(err => {
+  console.error('Schema error:', err);
+});
 
-export const products = [];
-
-app.listen(3000, () =>{
-    console.log("Server is running at http://localhost:3000")
-})
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
