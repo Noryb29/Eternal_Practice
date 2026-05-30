@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=\, initial-scale=1.0">
     <link rel="stylesheet" href="styles/story.css">
     <link rel="stylesheet" href="styles/navbar.css">
     <link rel="stylesheet" href="styles/sidebar.css">
-    
-    <title>Main Title</title>
+
+    <title>Characters Page</title>
 </head>
+
 <body>
 
     <header class="navbar">
         <div class="navbar__container">
             <a href="#" class="navbar__brand">WebCorp</a>
 
-            <button class="navbar__toggle" 
-                    id="navbarToggle" 
-                    aria-label="Toggle navigation" 
-                    aria-controls="navbarMenu" 
-                    aria-expanded="false">
+            <button class="navbar__toggle" id="navbarToggle" aria-label="Toggle navigation" aria-controls="navbarMenu"
+                aria-expanded="false">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -48,7 +47,9 @@
     </header>
 
     <aside class="sidebar">
-        <h1 id="sidebarH1">Story Generator Site</h1>
+        <a href="index.html">
+            <h1 id="sidebarH1">Story Generator Site</h1>
+        </a>
         <nav>
             <ul>
                 <li><a href="story.html">The Story so Far</a></li>
@@ -65,37 +66,55 @@
         <div class="inputs">
 
             <div>
-                <h1>This is div 1</h1>
+                <h1>Locations</h1>
                 <form>
-                    <label for="storyTitle">Please Enter a Title</label><br>
-                    <input name="storyTitle">
+                    <label for="locName">Please Enter Location Name</label><br>
+                    <input name="locName"><br>
+                    <label for="altName">Please Enter Alter Names</label><br>
+                    <input name="altName"><br>
+                    <label for="landMarks">Please Enter LandMarks</label><br>
+                    <input name="landMarks"><br>
+                    <label for="envName">Please Enter Environment</label><br>
+                    <input name="envName"><br>
+                    <label for="locLore">Enter Lore</label><br>
+                    <textarea></textarea>
                 </form>
             </div>
 
             <div>
-                <h1>This is div 2</h1>
-                <form>
-                    <label for="charName">Please Enter Character Name</label><br>
-                    <input name="charName"><br>
-                    <label for="charRace">Please Enter Character Race</label><br>
-                    <input name="charRace"><br>
-                    <label for="charLocation">Please Enter Character Location</label><br>
-                    <input name="charLocation"><br>
-                    <label for="charGender">Please Enter Character Gender</label><br>
-                    <input name="charGender"><br>
-                    <label for="charBackstory">Enter Backstory</label><br>
-                    <textarea></textarea>
-                </form>
+                <h1>The Locations so Far</h1>
+                <table>
+
+                    <tr>
+                        <th>Location Name</th>
+                        <th>Alter Names</th>
+                        <th>LandMarks</th>
+                        <th>Environment</th>
+                        <th>Lore</th>
+                    </tr>
+                    <tr>
+                        <td>BackSwamp</td>
+                        <td>Bogs,Eye Marsh,Trollsbath</td>
+                        <td>Swamps,Frogmen,BorgTrees</td>
+                        <td>Musty,Smelly,Dangerous</td>
+                        <td>Was once home of the elves, now flooded by the king's greed</td>
+                    </tr>
+                </table>
             </div>
-            <div>
-                <h1>This is div 3</h1>
-            </div>
+
+
         </div>
 
     </div>
 
 
-
+    <script>
+        function addStory() {
+            const text = document.getElementById("storyInput").value;
+            document.getElementById("storyTextContainer").innerText = text;
+        }
+    </script>
 
 </body>
+
 </html>

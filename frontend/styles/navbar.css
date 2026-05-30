@@ -1,0 +1,223 @@
+/*
+========================================
+CSS Custom Properties
+========================================
+*/
+:root {
+    --color-background: #ffffff;
+    --color-text-primary: #343a40;
+    --color-text-secondary: #6c757d;
+    --color-primary-cta: #0d6efd;
+    --color-primary-cta-hover: #0b5ed7;
+    --color-border-subtle: #e9ecef;
+
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-bold: 600;
+
+    --navbar-height: 70px;
+    --navbar-padding: 1rem;
+    --container-width: 1140px;
+    --border-radius: 0.25rem;
+    --transition-speed: 0.2s;
+}
+
+/*
+========================================
+Global Styles
+========================================
+*/
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family-sans-serif);
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+    color: var(--color-text-primary);
+}
+
+/*
+========================================
+Navbar
+========================================
+*/
+.navbar {
+    position: sticky;
+    top: 0;
+
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+    background-color: var(--color-background);
+    z-index: 1000;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    max-width: var(--container-width);
+
+    margin: 0 auto;
+    padding: 0 var(--navbar-padding);
+}
+
+.navbar__brand {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+}
+
+/*
+========================================
+Mobile Menu
+========================================
+*/
+.navbar__toggle {
+    display: block;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--border-radius);
+
+    padding: 0.25rem 0.75rem;
+
+    background: transparent;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.navbar__toggle .bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    margin: 6px 0;
+
+    background-color: var(--color-text-primary);
+    transition: all var(--transition-speed) ease;
+}
+
+.navbar__toggle.is-active .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.navbar__toggle.is-active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.navbar__toggle.is-active .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+.navbar__menu {
+    display: none;
+    flex-direction: column;
+
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+
+    width: 100%;
+
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border-subtle);
+
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    z-index: 999;
+}
+
+.navbar__menu.is-active {
+    display: flex;
+}
+
+.navbar__item {
+    text-align: center;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.navbar__link {
+    display: block;
+    padding: 1.25rem;
+    font-weight: var(--font-weight-bold);
+}
+
+:is(.navbar__toggle, .navbar__link):focus-visible {
+    outline: 2px solid var(--color-primary-cta);
+    outline-offset: 2px;
+    border-radius: var(--border-radius);
+}
+
+/*
+========================================
+Desktop Navbar
+========================================
+*/
+@media (min-width: 992px) {
+
+    .navbar__toggle {
+        display: none;
+    }
+
+    .navbar__menu {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        position: static;
+        width: auto;
+
+        background: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .navbar__list {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .navbar__item {
+        border: none;
+    }
+
+    .navbar__link {
+        font-weight: var(--font-weight-normal);
+        padding: 0.5rem 0;
+    }
+
+    .navbar__link--cta {
+        background-color: var(--color-primary-cta);
+        color: #fff;
+
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .navbar__link--cta:hover {
+        color: #fff;
+        background-color: var(--color-primary-cta-hover);
+    }
+}

@@ -2,12 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Characters Table</title>
+    <meta name="viewport" content="width=\, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/story.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link rel="stylesheet" href="styles/sidebar.css">
+    <title>Characters Page</title>
 </head>
 <body>
-    <div>
-        <h1>Characters</h1>
+
+    <header class="navbar">
+        <div class="navbar__container">
+            <a href="#" class="navbar__brand">WebCorp</a>
+
+            <button class="navbar__toggle" 
+                    id="navbarToggle" 
+                    aria-label="Toggle navigation" 
+                    aria-controls="navbarMenu" 
+                    aria-expanded="false">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
+            <nav id="navbarMenu" class="navbar__menu" role="navigation">
+                <ul class="navbar__list">
+                    <li class="navbar__item">
+                        <a href="#" class="navbar__link">Home</a>
+                    </li>
+
+                    <li class="navbar__item">
+                        <a href="#" class="navbar__link">About</a>
+                    </li>
+
+                    <li class="navbar__item">
+                        <a href="#" class="navbar__link">Services</a>
+                    </li>
+
+                    <li class="navbar__item">
+                        <a href="#" class="navbar__link navbar__link--cta">Contact</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <h1 id="sidebarH1">Story Generator Site</h1>
+        <nav>
+            <ul>
+                <li><a href="story.html">The Story so Far</a></li>
+                <li><a href="characters.html">Characters</a></li>
+                <li><a href="locations.html">Locations</a></li>
+                <li><a href="">Planned Plots</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="main">
+        <h1>Hello</h1>
+
+        <div class="inputs">
+
+            <div>
+                <h1>This is div 1</h1>
+                <div>
+                <h1>This is div 2</h1>
+                <form>
+                    <label for="charName">Please Enter Character Name</label><br>
+                    <input name="charName"><br>
+                    <label for="charRace">Please Enter Character Race</label><br>
+                    <input name="charRace"><br>
+                    <label for="charLocation">Please Enter Character Location</label><br>
+                    <input name="charLocation"><br>
+                    <label for="charGender">Please Enter Character Gender</label><br>
+                    <input name="charGender"><br>
+                    <label for="charBackstory">Enter Backstory</label><br>
+                    <textarea></textarea>
+                </form>
+            </div>
+            </div>
+
+            <div>
+                <h1>The Characters so Far</h1>
+                <table>  
+                                    
+                    <tr>
+                        <th>Character Name</th>
+                        <th>Character Race</th>
+                        <th>Character Location</th>
+                        <th>Character Gender</th>
+                        <th>Backstory</th>
+                    </tr>
+                    <tr>
+                        <td>Popol</td>
+                        <td>dogs</td>
+                        <td>Euriditio</td>
+                        <td>Male</td>
+                        <td>LOSDOAHSDHASJDHKASHDKASHJKDk</td>
+                    </tr>
+                </table>
+            </div>
+
+            
+        </div>
+
     </div>
+
+
+    <script>
+        function addStory(){
+            const text = document.getElementById("storyInput").value;
+            document.getElementById("storyTextContainer").innerText = text;
+        }
+    </script>
+
 </body>
 </html>

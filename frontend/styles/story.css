@@ -1,0 +1,252 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6fb;
+    margin: 0;
+}
+
+.main {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.page-title {
+    text-align: left;
+    margin-bottom: 30px;
+    margin-left: 20px;
+    font-size: 32px;
+    color: #222;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* CARD DESIGN */
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+
+/* INPUTS */
+label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #444;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #4a90e2;
+}
+
+/* TEXTAREA */
+.storyText {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    resize: none;
+}
+
+.allStoryText {
+    width: 100%;
+    height: 500px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+}
+
+/* BUTTON */
+button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #357bd8;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+th {
+    background: #f7f7f7;
+}
+
+.paginationControls{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.paginationControls button{
+    width: auto;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #111827;
+    color: white;
+    font-size: 13px;
+}
+
+.paginationControls button:hover{
+    background: #2563eb;
+}
+
+#pageInfo{
+    font-weight: 600;
+    color: #374151;
+}
+
+
+.addCharacterModal {
+    width: 700px;
+    max-width: 90vw;
+    padding: 30px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    font-family: Arial, sans-serif;
+    left: 30%;
+    top: 20px;
+}
+
+.addCharacterModal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.addCharacterModal h2 {
+    margin-bottom: 25px;
+    text-align: center;
+    color: #333;
+}
+
+.addCharacterForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.addCharacterForm label {
+    font-weight: 600;
+    color: #444;
+}
+
+.addCharacterForm input,
+.addCharacterForm textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.addCharacterForm input:focus,
+.addCharacterForm textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+.charBackstory {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.modalBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.saveBtn {
+    background: #0d6efd;
+    color: white;
+}
+
+.saveBtn:hover {
+    background: #0b5ed7;
+}
+
+.closeBtn {
+    background: #e9ecef;
+    color: #333;
+}
+
+.closeBtn:hover {
+    background: #dcdfe3;
+}
+.addCharacterForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 20px;
+}
+
+.addCharacterForm .full-width {
+    grid-column: 1 / -1;
+}
+.cardh2{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
